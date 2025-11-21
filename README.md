@@ -100,7 +100,7 @@ The main components you will need for _basic_ development work, are your OS vers
 
 - A VPN Client (OpenVPN or Tunnelblick are 2 NHS Digital suggested options)
 - Git
-- Python (The project currently runs on 3.12)
+- Python (The project currently runs on Python 3.14)
 - AWS CLI
 - Docker/Podman
 
@@ -192,7 +192,7 @@ To run ruff on you branch:
 
 List all the type of test suites included and provide instructions how to execute them
 
-- Unit Testing
+- Unit
 - Integration
 - Performance
 
@@ -482,7 +482,7 @@ To quick update the lambdas run the following command. Note this only updates th
 
 ### Remove deployment with commit tag
 
-You can remove a dev deployment using a single command to create a tag which then runs an AWS CodeBuild project that will remove that environment
+You can remove a dev deployment using a single command to create a tag which then starts an AWS CodeBuild project that will remove that environment
 
     make tag-commit-to-destroy-environment ENVIRONMENT=[environment to destroy] COMMIT=[short commit hash]
     e.g. make tag-commit-to-destroy-environment ENVIRONMENT=ds-363 COMMIT=2bc43dd // This destroys the ds-363 dev environment

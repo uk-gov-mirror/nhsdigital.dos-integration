@@ -15,8 +15,9 @@ lint.ignore = [
   "DTZ007",  # the use of `datetime.datetime.strptime()` without %z must be followed by `.replace(tzinfo=)` or `.astimezone()`
 ]
 
-# Set python version to 3.12.
-target-version = "py312"
+# Ruff currently supports up to Python 3.13; use py313 as target until py314 is released upstream.
+# (Runtime may be 3.14; this setting only affects linting's syntax features.)
+target-version = "py313"
 
 [tool.ruff.lint.per-file-ignores]
 "**test_*.py" = ["S101"] # Allow `assert` in tests.

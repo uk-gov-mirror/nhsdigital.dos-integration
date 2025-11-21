@@ -21,7 +21,7 @@ CodePipeline
 Xcode
 Tunnelblick
 // Environments
-dev
+[Dd]ev
 perf
 perf2
 nonprod
@@ -32,14 +32,20 @@ mgmt
 MGMT
 // Development/Deployment Terms
 adhoc
+rebase
+pytest
 healthcheck
-runbook
-Runbook
+[Rr]unbooks?
+Allowlist
+slack_and_infrastructure
+opening_times
+hotfixes
+automations
 undeploy
 Undeploy
+undeployed
 Onboarding
 onboarding
 // Miscellaneous
 bbbbbb
 gggggg
-[A-Z]+s

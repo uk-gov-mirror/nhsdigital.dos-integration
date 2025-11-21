@@ -135,7 +135,7 @@ line-length = 120
 # Allow unused variables when underscore-prefixed.
 lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-# Set target version to Python 3.12.
+# Set target version to Python 3.14.
 target-version = "py312"
 
 [tool.ruff.lint.per-file-ignores]
