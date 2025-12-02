@@ -3,12 +3,12 @@
 // to propagate. Note: This does NOT guarantee post-create consistency
 // of the query definitions themselves, but can reduce immediate read
 // failures when the provider plans many resources concurrently.
-# resource "time_sleep" "wait_for_propagation" {
-#   create_duration = "45s"
-# }
+resource "time_sleep" "wait_for_propagation" {
+  create_duration = "45s"
+}
 
 resource "aws_cloudwatch_query_definition" "search_for_errors" {
-  # depends_on = [time_sleep.wait_for_propagation]
+  depends_on = [time_sleep.wait_for_propagation]
   name = "${var.project_id}/${var.blue_green_environment}/search-for-errors"
 
   log_group_names = [
@@ -30,7 +30,6 @@ EOF
   lifecycle {
     create_before_destroy = false
   }
-
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_correlation_id" {
@@ -52,6 +51,7 @@ fields @timestamp, message
 | filter correlation_id == 'REPLACE'
 | sort @timestamp
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -76,6 +76,7 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter correlation_id == 'REPLACE'
 | sort @timestamp
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -100,6 +101,7 @@ fields @timestamp, message
 | filter ods_code == 'REPLACE'
 | sort @timestamp
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -124,6 +126,7 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter ods_code == 'REPLACE'
 | sort @timestamp
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -142,6 +145,7 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter report_key == 'INVALID_POSTCODE'
 | sort @timestamp
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -160,6 +164,7 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter report_key == 'INVALID_OPEN_TIMES'
 | sort @timestamp
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -179,6 +184,7 @@ fields correlation_id
 | filter message =="Email Correlation Id"
 | filter email_correlation_id == "ADD_EMAIL_CORRELATION_ID"
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -197,6 +203,7 @@ fields @timestamp, correlation_id
 | filter ServiceUpdateSuccess == 1
 | sort @timestamp desc
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -215,6 +222,7 @@ fields @timestamp, correlation_id, report_key
 | filter report_key == DOS_DB_UPDATE_DLQ_HANDLER_RECEIVED_EVENT
 | sort @timestamp desc
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -235,6 +243,7 @@ fields @timestamp, correlation_id
 | filter field == 'REPLACE'
 | sort @timestamp desc
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -260,6 +269,7 @@ fields @timestamp, correlation_id, message
 | filter level == 'WARNING'
 | sort @timestamp desc
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
@@ -279,6 +289,7 @@ fields @timestamp, level, message
 | filter odscode = 'TO_ADD'
 | sort @timestamp asc
 EOF
+
   lifecycle {
     create_before_destroy = false
   }
