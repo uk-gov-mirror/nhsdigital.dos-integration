@@ -12,7 +12,7 @@ from application.ingest_change_event.ingest_change_event import lambda_handler
 FILE_PATH = "application.ingest_change_event.ingest_change_event"
 
 
-@patch(f"{FILE_PATH}.sqs")
+@patch(f"{FILE_PATH}.sqs_client")
 @patch(f"{FILE_PATH}.HoldingQueueChangeEventItem")
 @patch(f"{FILE_PATH}.add_change_event_to_dynamodb")
 @patch(f"{FILE_PATH}.get_latest_sequence_id_for_a_given_odscode_from_dynamodb")
@@ -72,7 +72,7 @@ def test_lambda_handler(
     del environ["HOLDING_QUEUE_URL"]
 
 
-@patch(f"{FILE_PATH}.sqs")
+@patch(f"{FILE_PATH}.sqs_client")
 @patch(f"{FILE_PATH}.HoldingQueueChangeEventItem")
 @patch(f"{FILE_PATH}.add_change_event_to_dynamodb")
 @patch(f"{FILE_PATH}.get_latest_sequence_id_for_a_given_odscode_from_dynamodb")
@@ -130,7 +130,7 @@ def test_lambda_handler_with_sensitive_staff_key(
 
 
 @patch.object(Logger, "error")
-@patch(f"{FILE_PATH}.sqs")
+@patch(f"{FILE_PATH}.sqs_client")
 @patch(f"{FILE_PATH}.HoldingQueueChangeEventItem")
 @patch(f"{FILE_PATH}.add_change_event_to_dynamodb")
 @patch(f"{FILE_PATH}.get_latest_sequence_id_for_a_given_odscode_from_dynamodb")
@@ -183,7 +183,7 @@ def test_lambda_handler_no_sequence_number(
 
 
 @patch.object(Logger, "error")
-@patch(f"{FILE_PATH}.sqs")
+@patch(f"{FILE_PATH}.sqs_client")
 @patch(f"{FILE_PATH}.HoldingQueueChangeEventItem")
 @patch(f"{FILE_PATH}.add_change_event_to_dynamodb")
 @patch(f"{FILE_PATH}.get_latest_sequence_id_for_a_given_odscode_from_dynamodb")
@@ -239,7 +239,7 @@ def test_lambda_handler_less_than_latest_sequence_number(
     del environ["HOLDING_QUEUE_URL"]
 
 
-@patch(f"{FILE_PATH}.sqs")
+@patch(f"{FILE_PATH}.sqs_client")
 @patch(f"{FILE_PATH}.HoldingQueueChangeEventItem")
 @patch(f"{FILE_PATH}.add_change_event_to_dynamodb")
 @patch(f"{FILE_PATH}.get_latest_sequence_id_for_a_given_odscode_from_dynamodb")

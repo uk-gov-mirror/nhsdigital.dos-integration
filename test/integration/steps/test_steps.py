@@ -6,11 +6,11 @@ from json import loads
 from os import environ, getenv
 from random import randint
 from time import sleep
+from zoneinfo import ZoneInfo
 
 from faker import Faker
 from pytest_bdd import given, scenarios, then, when
 from pytest_bdd.parsers import parse
-from pytz import timezone
 
 from .functions.api import process_payload, process_payload_with_sequence
 from .functions.assertions import assert_standard_closing, assert_standard_openings
@@ -600,7 +600,7 @@ def future_set_specified_opening_date(future_past: str, context: Context) -> Con
     """
     year = 0
     if future_past.lower() == "future":
-        year = dt.now(tz=timezone("Europe/London")).year + 1
+        year = dt.now(tz=ZoneInfo("Europe/London")).year + 1
         context.change_event["OpeningTimes"].append(
             {
                 "Weekday": "",
@@ -883,7 +883,7 @@ def the_change_event_is_sent_for_processing(context: Context, valid_or_invalid: 
     """
     if context.phone is not None or context.website is not None:
         context.change_event["Contacts"] = build_change_event_contacts(context)
-    context.start_time = dt.now(tz=timezone("Europe/London")).timestamp()
+    context.start_time = dt.now(tz=ZoneInfo("Europe/London")).timestamp()
     context.correlation_id = generate_correlation_id()
     context.response = process_payload(context, valid_or_invalid == "valid", context.correlation_id)
     context.sequence_number = context.response.request.headers["sequence-number"]
@@ -905,7 +905,7 @@ def the_change_event_is_sent_with_custom_sequence(context: Context, seqid: str) 
     Returns:
         Context: The context object.
     """
-    context.start_time = dt.now(tz=timezone("Europe/London")).timestamp()
+    context.start_time = dt.now(tz=ZoneInfo("Europe/London")).timestamp()
     context.correlation_id = generate_correlation_id()
     context.response = process_payload_with_sequence(context, context.correlation_id, seqid)
     context.sequence_number = seqid
@@ -927,7 +927,7 @@ def the_change_event_is_sent_with_no_sequence(context: Context) -> Context:
     Returns:
         Context: The context object.
     """
-    context.start_time = dt.now(tz=timezone("Europe/London")).timestamp()
+    context.start_time = dt.now(tz=ZoneInfo("Europe/London")).timestamp()
     context.correlation_id = generate_correlation_id()
     context.response = process_payload_with_sequence(context, context.correlation_id, None)
     return context
@@ -947,7 +947,7 @@ def the_change_event_is_sent_with_duplicate_sequence(context: Context) -> Contex
     Returns:
         Context: The context object.
     """
-    context.start_time = dt.now(tz=timezone("Europe/London")).timestamp()
+    context.start_time = dt.now(tz=ZoneInfo("Europe/London")).timestamp()
     context.correlation_id = generate_correlation_id()
     context.change_event["Address1"] = "New Test Address Value"
     seqid = 0
@@ -1836,7 +1836,7 @@ def _(context: Context) -> Context:
     Returns:
         Context: The context object.
     """
-    context.start_time = dt.now(tz=timezone("Europe/London")).timestamp()
+    context.start_time = dt.now(tz=ZoneInfo("Europe/London")).timestamp()
     context.response = invoke_quality_checker_lambda()
     return context
 

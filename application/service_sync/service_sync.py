@@ -8,6 +8,7 @@ from aws_lambda_powertools.utilities.data_classes import SQSEvent, event_source
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from boto3 import client
+from botocore.config import Config
 
 from .data_processing.check_for_change import compare_nhs_uk_and_dos_data
 from .data_processing.get_data import get_dos_service_and_history
@@ -20,6 +21,8 @@ from common.utilities import extract_body
 
 tracer = Tracer()
 logger = Logger()
+boto_config = Config(connect_timeout=10, read_timeout=15)
+sqs_client = client("sqs", config=boto_config)
 
 
 @tracer.capture_lambda_handler()
@@ -82,6 +85,5 @@ def remove_sqs_message_from_queue(receipt_handle: str) -> None:
     Args:
         receipt_handle (str): The SQS message receipt handle
     """
-    sqs = client("sqs")
-    sqs.delete_message(QueueUrl=getenv("UPDATE_REQUEST_QUEUE_URL"), ReceiptHandle=receipt_handle)
+    sqs_client.delete_message(QueueUrl=getenv("UPDATE_REQUEST_QUEUE_URL"), ReceiptHandle=receipt_handle)
     logger.info("Removed SQS message from queue", receipt_handle=receipt_handle)

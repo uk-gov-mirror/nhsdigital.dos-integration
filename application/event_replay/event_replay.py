@@ -8,9 +8,18 @@ from aws_lambda_powertools.tracing import Tracer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from boto3 import client
 from boto3.dynamodb.types import TypeDeserializer
+from botocore.config import Config
 from simplejson import dumps
 
 from common.middlewares import unhandled_exception_logging
+
+# Configure boto3 client with explicit timeout to prevent hanging in Lambda
+# Timeouts tuned for typical DynamoDB/SQS operations while preventing indefinite hangs
+boto_config = Config(connect_timeout=10, read_timeout=15)
+
+# Create clients at module level for connection reuse across Lambda invocations
+dynamodb_client = client("dynamodb", config=boto_config)
+sqs_client = client("sqs", config=boto_config)
 
 tracer = Tracer()
 logger = Logger()
@@ -75,7 +84,7 @@ def get_change_event(odscode: str, sequence_number: Decimal) -> dict[str, Any]:
     Returns:
         dict[str, Any]: The change event
     """
-    response = client("dynamodb").query(
+    response = dynamodb_client.query(
         TableName=getenv("CHANGE_EVENTS_TABLE_NAME"),
         IndexName="gsi_ods_sequence",
         ProjectionExpression="Event",
@@ -112,11 +121,10 @@ def send_change_event(change_event: dict[str, Any], odscode: str, sequence_numbe
         sequence_number (int): The sequence number of the change event
         correlation_id (str): The correlation id of the event replay
     """
-    sqs = client("sqs")
     queue_url = getenv("CHANGE_EVENT_SQS_URL")
     logger.info("Sending change event to SQS", queue_url=queue_url)
     change_event_str = dumps(change_event)
-    response = sqs.send_message(
+    response = sqs_client.send_message(
         QueueUrl=queue_url,
         MessageBody=change_event_str,
         MessageGroupId=odscode,

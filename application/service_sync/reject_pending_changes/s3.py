@@ -14,5 +14,12 @@ def put_content_to_s3(content: bytes, s3_filename: str) -> None:
         s3_filename (str): The filename when the file is stored in S3
     """
     bucket = getenv("SEND_EMAIL_BUCKET_NAME")
-    client("s3").put_object(Body=content, Bucket=bucket, Key=s3_filename, ServerSideEncryption="AES256")
+    aws_account_id = getenv("AWS_ACCOUNT_ID")
+    client("s3").put_object(
+        Body=content,
+        Bucket=bucket,
+        Key=s3_filename,
+        ServerSideEncryption="AES256",
+        ExpectedBucketOwner=aws_account_id,
+    )
     logger.info(f"Uploaded to S3 as {s3_filename}", bucket=bucket, s3_filename=s3_filename)

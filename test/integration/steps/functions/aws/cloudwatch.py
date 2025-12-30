@@ -4,10 +4,10 @@ from json import dumps
 from os import getenv
 from sqlite3 import Timestamp
 from time import sleep
+from zoneinfo import ZoneInfo
 
 from boto3 import client
 from botocore.exceptions import ClientError
-from pytz import timezone
 
 LAMBDA_CLIENT_LOGS = client("logs")
 
@@ -40,7 +40,7 @@ def get_logs(
             start_query_response = LAMBDA_CLIENT_LOGS.start_query(
                 logGroupName=log_group_name,
                 startTime=int(start_time),
-                endTime=int(datetime.now(timezone("Europe/London")).timestamp()),
+                endTime=int(datetime.now(ZoneInfo("Europe/London")).timestamp()),
                 queryString=query,
             )
         except ClientError as error:
@@ -87,7 +87,7 @@ def negative_log_check(query: str, event_lambda: str, start_time: Timestamp) -> 
             start_query_response = LAMBDA_CLIENT_LOGS.start_query(
                 logGroupName=log_group_name,
                 startTime=int(start_time),
-                endTime=int(datetime.now(timezone("Europe/London")).timestamp()),
+                endTime=int(datetime.now(ZoneInfo("Europe/London")).timestamp()),
                 queryString=query,
             )
         except ClientError as error:

@@ -2,9 +2,9 @@ from json import dumps
 from os import environ
 from random import choices
 from unittest.mock import MagicMock, call, patch
+from zoneinfo import ZoneInfo
 
 import pytest
-from pytz import timezone
 
 from application.service_sync.reject_pending_changes.pending_changes import (
     PendingChange,
@@ -272,7 +272,7 @@ def test_reject_pending_changes_single_rejection(mock_query_dos_db: MagicMock, m
     response = reject_pending_changes(connection, pending_changes)
     # Assert
     assert None is response
-    mock_datetime.now.assert_called_once_with(timezone("Europe/London"))
+    mock_datetime.now.assert_called_once_with(ZoneInfo("Europe/London"))
     mock_query_dos_db.assert_called_once_with(
         connection=connection,
         query=(
@@ -299,7 +299,7 @@ def test_reject_pending_changes_multiple_rejections(mock_query_dos_db: MagicMock
     response = reject_pending_changes(connection, pending_changes)
     # Assert
     assert None is response
-    mock_datetime.now.assert_called_once_with(timezone("Europe/London"))
+    mock_datetime.now.assert_called_once_with(ZoneInfo("Europe/London"))
     mock_query_dos_db.assert_called_once_with(
         connection=connection,
         query=(

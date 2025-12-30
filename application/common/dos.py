@@ -254,7 +254,7 @@ def db_rows_to_spec_open_times(db_rows: Iterable[dict]) -> list[SpecifiedOpening
     for date, rows in groupby(date_sorted_rows, lambda row: row["date"]):
         is_open = True
         open_periods = []
-        for row in list(rows):
+        for row in rows:
             if row["isclosed"] is True:
                 is_open = False
             else:

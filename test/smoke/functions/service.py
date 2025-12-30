@@ -1,8 +1,6 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from json import loads
 from time import sleep
-
-from pytz import UTC
 
 from .aws import invoke_dos_db_handler_lambda
 from .change_event import ChangeEvent

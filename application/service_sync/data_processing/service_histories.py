@@ -3,11 +3,11 @@ from itertools import chain
 from json import dumps, loads
 from time import time
 from typing import Any, Self
+from zoneinfo import ZoneInfo
 
 from aws_lambda_powertools.logging import Logger
 from psycopg import Connection
 from psycopg.rows import dict_row
-from pytz import timezone
 
 from .service_histories_change import ServiceHistoriesChange
 from common.constants import (
@@ -209,7 +209,7 @@ class ServiceHistories:
         # Generate the epoch time in seconds rounded down to the nearest second at the time of saving
         current_epoch_time = str(int(time()))
         # Get local datetime and format it to DoS date/time format
-        current_date_time = datetime.now(timezone("Europe/London")).strftime("%Y-%m-%d %H:%M:%S")
+        current_date_time = datetime.now(ZoneInfo("Europe/London")).strftime("%Y-%m-%d %H:%M:%S")
         # Rename the new_change key to the current epoch time
         self.service_history[current_epoch_time] = self.service_history.pop("new_change")
         # Add the current time to the service_histories json

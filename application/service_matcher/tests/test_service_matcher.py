@@ -119,7 +119,7 @@ def test_lambda_handler_should_throw_exception_if_event_records_len_not_eq_one(l
     del environ["ENV"]
 
 
-@patch(f"{FILE_PATH}.sqs")
+@patch(f"{FILE_PATH}.sqs_client")
 @patch.object(Logger, "get_correlation_id", return_value="1")
 @patch.object(Logger, "warning")
 def test_send_update_requests(

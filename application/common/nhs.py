@@ -165,7 +165,7 @@ class NHSEntity:
             date = datetime.strptime(date_str, "%b  %d  %Y").date()
             is_open = True
 
-            for item in list(op_dict_list):
+            for item in op_dict_list:
                 if item["IsOpen"]:
                     open_periods.append(OpenPeriod.from_string_times(item["OpeningTime"], item["ClosingTime"]))
                 else:
