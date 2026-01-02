@@ -17,7 +17,7 @@ from common.types import HoldingQueueChangeEventItem
 from common.utilities import extract_body, get_sequence_number
 
 # Configure boto3 client with explicit timeout to prevent hanging in Lambda
-boto_config = Config(connect_timeout=10, read_timeout=15)
+boto_config = Config(connect_timeout=60, read_timeout=60)
 
 logger = Logger()
 tracer = Tracer()

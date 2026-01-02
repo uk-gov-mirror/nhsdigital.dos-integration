@@ -21,7 +21,7 @@ from common.utilities import extract_body
 
 tracer = Tracer()
 logger = Logger()
-boto_config = Config(connect_timeout=10, read_timeout=15)
+boto_config = Config(connect_timeout=60, read_timeout=60)
 sqs_client = client("sqs", config=boto_config)
 
 

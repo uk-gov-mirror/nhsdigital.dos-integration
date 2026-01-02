@@ -15,7 +15,7 @@ from common.middlewares import unhandled_exception_logging
 
 # Configure boto3 client with explicit timeout to prevent hanging in Lambda
 # Timeouts tuned for typical DynamoDB/SQS operations while preventing indefinite hangs
-boto_config = Config(connect_timeout=10, read_timeout=15)
+boto_config = Config(connect_timeout=60, read_timeout=60)
 
 # Create clients at module level for connection reuse across Lambda invocations
 dynamodb_client = client("dynamodb", config=boto_config)
