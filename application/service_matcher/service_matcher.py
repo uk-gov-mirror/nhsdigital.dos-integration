@@ -8,6 +8,7 @@ from aws_lambda_powertools.tracing import Tracer
 from aws_lambda_powertools.utilities.data_classes import SQSEvent, event_source
 from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 from boto3 import client
+from botocore.config import Config
 
 from .matching import get_matching_services
 from .review_matches import review_matches
@@ -16,9 +17,13 @@ from common.nhs import NHSEntity
 from common.types import HoldingQueueChangeEventItem, UpdateRequest
 from common.utilities import extract_body
 
+# Configure boto3 client with explicit timeout to prevent hanging in Lambda
+boto_config = Config(connect_timeout=60, read_timeout=60)
+
 logger = Logger()
 tracer = Tracer()
-sqs = client("sqs")
+# Create SQS client at module level for connection reuse across Lambda invocations
+sqs_client = client("sqs", config=boto_config)
 
 
 @unhandled_exception_logging()
@@ -115,7 +120,7 @@ def send_update_requests(
     for i, chunk in enumerate(chunks):
         # TODO: Handle errors?
         logger.debug(f"Sending off message chunk {i+1}/{len(chunks)}")
-        response = sqs.send_message_batch(QueueUrl=environ["UPDATE_REQUEST_QUEUE_URL"], Entries=chunk)
+        response = sqs_client.send_message_batch(QueueUrl=environ["UPDATE_REQUEST_QUEUE_URL"], Entries=chunk)
         logger.debug("Sent off message chunk", response=response)
         logger.warning(
             "Sent Off Update Request",

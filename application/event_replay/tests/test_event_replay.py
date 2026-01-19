@@ -102,7 +102,7 @@ def test_build_correlation_id(mock_time_ns: MagicMock) -> None:
     assert response == f"{time}-local-replayed-event"
 
 
-@patch(f"{FILE_PATH}.client")
+@patch(f"{FILE_PATH}.dynamodb_client")
 def test_get_change_event(mock_client: MagicMock, change_event: dict[str, str], event: dict[str, str]) -> None:
     # Arrange
     table_name = "my-table"
@@ -110,13 +110,12 @@ def test_get_change_event(mock_client: MagicMock, change_event: dict[str, str], 
     environ["AWS_REGION"] = "eu-west-1"
     serializer = TypeSerializer()
 
-    mock_client.return_value.query.return_value = {"Items": [{"Event": serializer.serialize(change_event)}]}
+    mock_client.query.return_value = {"Items": [{"Event": serializer.serialize(change_event)}]}
     # Act
     response = get_change_event(event["odscode"], Decimal(event["sequence_number"]))
     # Assert
     assert response == change_event
-    mock_client.assert_called_with("dynamodb")
-    mock_client().query.assert_called_with(
+    mock_client.query.assert_called_with(
         TableName=table_name,
         IndexName="gsi_ods_sequence",
         ProjectionExpression="Event",
@@ -130,7 +129,7 @@ def test_get_change_event(mock_client: MagicMock, change_event: dict[str, str], 
     del environ["AWS_REGION"]
 
 
-@patch(f"{FILE_PATH}.client")
+@patch(f"{FILE_PATH}.dynamodb_client")
 def test_get_change_event_no_change_event_in_dynamodb(
     mock_client: MagicMock, change_event: dict[str, str], event: dict[str, str]
 ) -> None:
@@ -138,13 +137,12 @@ def test_get_change_event_no_change_event_in_dynamodb(
     table_name = "my-table"
     environ["CHANGE_EVENTS_TABLE_NAME"] = table_name
     environ["AWS_REGION"] = "eu-west-1"
-    mock_client.return_value.query.return_value = {"Items": []}
+    mock_client.query.return_value = {"Items": []}
     # Act
     with pytest.raises(ValueError, match="No change event found for ods code FXXX1 and sequence number 1"):
         get_change_event(event["odscode"], Decimal(event["sequence_number"]))
     # Assert
-    mock_client.assert_called_with("dynamodb")
-    mock_client().query.assert_called_with(
+    mock_client.query.assert_called_with(
         TableName=table_name,
         IndexName="gsi_ods_sequence",
         ProjectionExpression="Event",
@@ -158,7 +156,7 @@ def test_get_change_event_no_change_event_in_dynamodb(
     del environ["AWS_REGION"]
 
 
-@patch(f"{FILE_PATH}.client")
+@patch(f"{FILE_PATH}.sqs_client")
 def test_send_change_event(mock_client: MagicMock, change_event: dict[str, str], event: dict[str, str]) -> None:
     # Arrange
     correlation_id = "CORRELATION_ID"
@@ -166,8 +164,7 @@ def test_send_change_event(mock_client: MagicMock, change_event: dict[str, str],
     # Act
     send_change_event(change_event, event["odscode"], int(event["sequence_number"]), correlation_id)
     # Assert
-    mock_client.assert_called_with("sqs")
-    mock_client().send_message.assert_called_with(
+    mock_client.send_message.assert_called_with(
         QueueUrl=queue_url,
         MessageBody=dumps(change_event),
         MessageGroupId=event["odscode"],

@@ -4,8 +4,7 @@ from json import loads
 from random import randrange
 from re import fullmatch
 from typing import Any
-
-from pytz import timezone
+from zoneinfo import ZoneInfo
 
 from .context import Context
 from .utils import invoke_dos_db_handler_lambda
@@ -358,7 +357,7 @@ def build_change_event_opening_times(context: Context) -> list:
             for days in context.generator_data["standard_openings"]
         )
     if "specified_openings" in context.generator_data:
-        present = datetime.now(timezone("Europe/London"))
+        present = datetime.now(ZoneInfo("Europe/London"))
         opening_times.extend(
             {
                 "AdditionalOpeningDate": days["date"],

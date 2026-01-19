@@ -366,6 +366,7 @@ module "service_sync_lambda" {
     "TEAM_EMAIL_ADDRESS"                 = local.project_team_email_address
     "SYSTEM_EMAIL_ADDRESS"               = local.project_system_email_address
     "SEND_EMAIL_LAMBDA_NAME"             = var.send_email_lambda
+    "AWS_ACCOUNT_ID"                     = tostring(var.aws_account_id)
   }
 }
 

@@ -4,3 +4,7 @@ class ValidationError(Exception):
 
 class DynamoDBError(Exception):
     """Exception raised for all DynamoDB errors."""
+
+
+class SecretsManagerError(Exception):
+    """Exception raised for AWS Secrets Manager errors."""

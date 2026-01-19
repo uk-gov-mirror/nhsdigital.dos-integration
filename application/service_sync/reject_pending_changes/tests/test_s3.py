@@ -10,6 +10,7 @@ FILE_PATH = "application.service_sync.reject_pending_changes.s3"
 def test_put_content_to_s3(mock_client: MagicMock) -> None:
     # Arrange
     environ["SEND_EMAIL_BUCKET_NAME"] = bucket_name = "bucket_name"
+    environ["AWS_ACCOUNT_ID"] = aws_account_id = "123456789012"
     s3_filename = "s3_filename"
     content = b"content"
     # Act
@@ -21,6 +22,8 @@ def test_put_content_to_s3(mock_client: MagicMock) -> None:
         Bucket=bucket_name,
         Key=s3_filename,
         ServerSideEncryption="AES256",
+        ExpectedBucketOwner=aws_account_id,
     )
     # Cleanup
     del environ["SEND_EMAIL_BUCKET_NAME"]
+    del environ["AWS_ACCOUNT_ID"]

@@ -19,19 +19,19 @@ logger = Logger(child=True)
 class ServiceHistoriesChange:
     """A change to be added to the servicehistories table."""
 
-    data: str
+    data: str | dict
     previous_value: str
     change_key: str
     change_action: str
     area: str
 
     def __init__(
-        self: Self, data: str, previous_value: str, change_key: str, area: str = DOS_DEMOGRAPHICS_AREA_TYPE
+        self: Self, data: str | dict, previous_value: str, change_key: str, area: str = DOS_DEMOGRAPHICS_AREA_TYPE
     ) -> None:
         """Initialises the ServiceHistoriesChange object.
 
         Args:
-            data (str): The data to be added to the servicehistories table.
+            data (str | dict): The data to be added to the servicehistories table.
             previous_value (str): The previous value of the data to be added to the servicehistories table.
             change_key (str): The change key for the data to be added to the servicehistories table.
             area (str): The area of the data to be added to the servicehistories table.
@@ -76,8 +76,7 @@ class ServiceHistoriesChange:
         Returns:
             str: Change action - add, delete
         """
-        new_value: dict[list[str]] = self.data
-        value = next(iter(new_value.keys()))
+        value = next(iter(self.data.keys()))
         return "add" if value == "add" else "delete"
 
     def get_opening_times_change_action(self: Self) -> str:

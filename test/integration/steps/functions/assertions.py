@@ -22,6 +22,21 @@ def assert_standard_closing(dos_times: list, ce_times: list[dict]) -> int:
     return counter
 
 
+def _assert_day_opening_times(
+    entry: dict, currentday: str, dates: dict, change_type: str, strict: bool | None, valid_change_types: list
+) -> None:
+    """Helper function to assert opening times for a single day."""
+    assert entry[currentday]["data"]["add"][0] == dates["times"], "ERROR: Dates do not match"
+    if strict:
+        assert entry[currentday]["changetype"] == change_type, "ERROR: Incorrect changetype"
+    else:
+        assert entry[currentday]["changetype"] in valid_change_types, "ERROR: Incorrect changetype"
+    if entry[currentday]["changetype"] == "add":
+        assert "remove" not in entry[currentday]["data"], "ERROR: Remove is present in service history"
+    elif entry[currentday]["changetype"] == "modify":
+        assert "remove" in entry[currentday]["data"], f"ERROR: Remove is not present for {currentday}"
+
+
 def assert_standard_openings(
     change_type: str,
     dos_times: list[dict],
@@ -45,14 +60,6 @@ def assert_standard_openings(
         currentday = next(iter(entry.keys()))
         for dates in ce_times:
             if dates["name"] == currentday:
-                assert entry[currentday]["data"]["add"][0] == dates["times"], "ERROR: Dates do not match"
-                if strict:
-                    assert entry[currentday]["changetype"] == change_type, "ERROR: Incorrect changetype"
-                else:
-                    assert entry[currentday]["changetype"] in valid_change_types, "ERROR: Incorrect changetype"
-                if entry[currentday]["changetype"] == "add":
-                    assert "remove" not in entry[currentday]["data"], "ERROR: Remove is present in service history"
-                elif entry[currentday]["changetype"] == "modify":
-                    assert "remove" in entry[currentday]["data"], f"ERROR: Remove is not present for {currentday}"
+                _assert_day_opening_times(entry, currentday, dates, change_type, strict, valid_change_types)
                 counter += 1
     return counter

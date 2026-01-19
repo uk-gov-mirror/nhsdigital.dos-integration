@@ -1,10 +1,10 @@
 from datetime import datetime
 from re import sub
+from zoneinfo import ZoneInfo
 
 import pytest
 from faker import Faker
 from pytest_bdd import given, scenarios, then, when
-from pytz import timezone
 
 from .functions.change_event import ChangeEvent
 from .functions.change_event_request import send_change_event
@@ -143,7 +143,7 @@ def _(smoke_test_context: SmokeTestContext) -> SmokeTestContext:
     Returns:
         SmokeTestContext: The smoke test context
     """
-    smoke_test_context.request_start_time = datetime.now(tz=timezone("Europe/London"))
+    smoke_test_context.request_start_time = datetime.now(tz=ZoneInfo("Europe/London"))
     change_event_json = smoke_test_context.updated_service.create_change_event()
     send_change_event(change_event_json)
     return smoke_test_context

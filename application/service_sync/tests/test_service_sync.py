@@ -122,15 +122,14 @@ def test_lambda_handler_exception(
 
 
 @patch.object(Logger, "info")
-@patch(f"{FILE_PATH}.client")
+@patch(f"{FILE_PATH}.sqs_client")
 def test_remove_sqs_message_from_queue(mock_client: MagicMock, mock_logger_info: MagicMock) -> None:
     # Arrange
     environ["UPDATE_REQUEST_QUEUE_URL"] = update_request_queue_url = "update_request_queue_url"
     # Act
     remove_sqs_message_from_queue(receipt_handle=RECEIPT_HANDLE)
     # Assert
-    mock_client.assert_called_once_with("sqs")
-    mock_client.return_value.delete_message.assert_called_once_with(
+    mock_client.delete_message.assert_called_once_with(
         QueueUrl=update_request_queue_url,
         ReceiptHandle=RECEIPT_HANDLE,
     )

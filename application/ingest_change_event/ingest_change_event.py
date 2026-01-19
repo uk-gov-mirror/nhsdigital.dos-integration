@@ -7,6 +7,8 @@ from aws_lambda_powertools.tracing import Tracer
 from aws_lambda_powertools.utilities.data_classes import SQSEvent, event_source
 from aws_lambda_powertools.utilities.typing.lambda_context import LambdaContext
 from boto3 import client
+from botocore.config import Config
+from botocore.exceptions import ClientError
 
 from .change_event_validation import validate_change_event
 from common.dynamodb import add_change_event_to_dynamodb, get_latest_sequence_id_for_a_given_odscode_from_dynamodb
@@ -14,9 +16,13 @@ from common.middlewares import redact_staff_key_from_event, unhandled_exception_
 from common.types import HoldingQueueChangeEventItem
 from common.utilities import extract_body, get_sequence_number
 
+# Configure boto3 client with explicit timeout to prevent hanging in Lambda
+boto_config = Config(connect_timeout=60, read_timeout=60)
+
 logger = Logger()
 tracer = Tracer()
-sqs = client("sqs")
+# Create SQS client at module level for connection reuse across Lambda invocations
+sqs_client = client("sqs", config=boto_config)
 
 
 @redact_staff_key_from_event()
@@ -82,8 +88,16 @@ def lambda_handler(event: SQSEvent, context: LambdaContext) -> None:  # noqa: AR
         correlation_id=logger.get_correlation_id(),
     )
     logger.debug("Change event validated", holding_queue_change_event_item=holding_queue_change_event_item)
-    sqs.send_message(
-        QueueUrl=getenv("HOLDING_QUEUE_URL"),
-        MessageBody=dumps(holding_queue_change_event_item),
-        MessageGroupId=ods_code,
-    )
+    try:
+        sqs_client.send_message(
+            QueueUrl=getenv("HOLDING_QUEUE_URL"),
+            MessageBody=dumps(holding_queue_change_event_item),
+            MessageGroupId=ods_code,
+        )
+    except ClientError as err:
+        logger.exception(
+            "Failed to send message to holding queue",
+            error_code=err.response["Error"]["Code"],
+            queue_url=getenv("HOLDING_QUEUE_URL"),
+        )
+        raise

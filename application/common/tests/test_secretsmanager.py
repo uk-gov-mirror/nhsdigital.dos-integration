@@ -4,6 +4,8 @@ import boto3
 import pytest
 from moto import mock_aws
 
+from application.common.errors import SecretsManagerError
+
 FILE_PATH = "application.common.secretsmanager"
 
 
@@ -26,5 +28,5 @@ def test_get_secret() -> None:
 def test_get_secret_resource_not_found() -> None:
     from application.common.secretsmanager import get_secret
 
-    with pytest.raises(Exception, match="Failed getting secret 'fake_secret_name' from secrets manager"):
+    with pytest.raises(SecretsManagerError, match="Failed getting secret 'fake_secret_name' from secrets manager"):
         get_secret("fake_secret_name")

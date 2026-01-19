@@ -4,12 +4,12 @@ from json import JSONDecodeError, dumps, loads
 from os import environ
 from time import time_ns
 from typing import Self
+from zoneinfo import ZoneInfo
 
 from aws_lambda_powertools.logging import Logger
 from boto3 import client
 from psycopg import Connection
 from psycopg.rows import DictRow
-from pytz import timezone
 
 from ..service_update_logger import ServiceUpdateLogger
 from .s3 import put_content_to_s3
@@ -153,7 +153,7 @@ def reject_pending_changes(connection: Connection, pending_changes: list[Pending
     )
     query_vars = {
         "USER_NAME": DOS_INTEGRATION_USER_NAME,
-        "TIMESTAMP": datetime.now(timezone("Europe/London")),
+        "TIMESTAMP": datetime.now(ZoneInfo("Europe/London")),
     }
     cursor = query_dos_db(connection=connection, query=sql_query, query_vars=query_vars)
     cursor.close()

@@ -21,11 +21,14 @@ def get_s3_email_file(context: Context) -> Context:
     sleep(45)
     email_file_name = "email_file.json"
     shared_environment = getenv("SHARED_ENVIRONMENT")
+    aws_account_id = getenv("AWS_ACCOUNT_ID")
     bucket_name = f"uec-dos-int-{shared_environment}-send-email-bucket"
-    response = S3_CLIENT.list_objects(Bucket=bucket_name)
+    response = S3_CLIENT.list_objects(Bucket=bucket_name, ExpectedBucketOwner=aws_account_id)
     object_key = response["Contents"][-1]["Key"]
     s3_resource = resource("s3")
-    s3_resource.meta.client.download_file(bucket_name, object_key, email_file_name)
+    s3_resource.meta.client.download_file(
+        bucket_name, object_key, email_file_name, ExtraArgs={"ExpectedBucketOwner": aws_account_id}
+    )
     with open(email_file_name) as email_file:
         context.other = load(email_file)
     remove("./email_file.json")
