@@ -85,6 +85,38 @@ resource "aws_codepipeline" "cicd_shared_resources_deployment_pipeline" {
         }
       }
     }
+    dynamic "action" {
+      for_each = local.cicd_nonprod_environments
+      content {
+        name            = "Deploy_CloudWatch_Queries_${action.value["SHARED_ENVIRONMENT"]}"
+        category        = "Build"
+        owner           = "AWS"
+        run_order       = 3
+        provider        = "CodeBuild"
+        input_artifacts = ["source_output"]
+        version         = "1"
+        configuration = {
+          ProjectName = aws_codebuild_project.deploy_cloudwatch_queries_stage.name
+          EnvironmentVariables = jsonencode([
+            {
+              name  = "AWS_ACCOUNT"
+              value = "${action.value["AWS_ACCOUNT"]}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "PROFILE"
+              value = "${action.value["PROFILE"]}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "SHARED_ENVIRONMENT"
+              value = "${action.value["SHARED_ENVIRONMENT"]}"
+              type  = "PLAINTEXT"
+            }
+          ])
+        }
+      }
+    }
   }
   stage {
     name = "Deploy_Cicd_Release_Environment"
@@ -120,11 +152,43 @@ resource "aws_codepipeline" "cicd_shared_resources_deployment_pipeline" {
         }
       }
     }
+    dynamic "action" {
+      for_each = local.cicd_prod_environments
+      content {
+        name            = "Deploy_CloudWatch_Queries_${action.value["SHARED_ENVIRONMENT"]}"
+        category        = "Build"
+        owner           = "AWS"
+        run_order       = 2
+        provider        = "CodeBuild"
+        input_artifacts = ["source_output"]
+        version         = "1"
+        configuration = {
+          ProjectName = aws_codebuild_project.deploy_cloudwatch_queries_stage.name
+          EnvironmentVariables = jsonencode([
+            {
+              name  = "AWS_ACCOUNT"
+              value = "${action.value["AWS_ACCOUNT"]}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "PROFILE"
+              value = "${action.value["PROFILE"]}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "SHARED_ENVIRONMENT"
+              value = "${action.value["SHARED_ENVIRONMENT"]}"
+              type  = "PLAINTEXT"
+            }
+          ])
+        }
+      }
+    }
     action {
       name            = "Smoke_Test_New_Version"
       category        = "Build"
       owner           = "AWS"
-      run_order       = 2
+      run_order       = 3
       provider        = "CodeBuild"
       input_artifacts = ["source_output"]
       version         = "1"
@@ -195,12 +259,42 @@ resource "aws_codepipeline" "cicd_shared_resources_deployment_pipeline" {
         ])
       }
     }
+    action {
+      name            = "Deploy_CloudWatch_Queries_Live"
+      category        = "Build"
+      owner           = "AWS"
+      run_order       = 2
+      provider        = "CodeBuild"
+      input_artifacts = ["source_output"]
+      version         = "1"
+      configuration = {
+        ProjectName = aws_codebuild_project.deploy_cloudwatch_queries_stage.name
+        EnvironmentVariables = jsonencode([
+          {
+            name  = "AWS_ACCOUNT"
+            value = "PROD"
+            type  = "PLAINTEXT"
+          },
+          {
+            name  = "PROFILE"
+            value = "live"
+            type  = "PLAINTEXT"
+          },
+          {
+            name  = "SHARED_ENVIRONMENT"
+            value = "live"
+            type  = "PLAINTEXT"
+          }
+        ])
+      }
+    }
   }
   depends_on = [
     module.cicd_blue_green_deployment_pipeline_artefact_bucket,
     aws_codebuild_project.unit_tests_stage,
     aws_codebuild_project.integration_tests,
     aws_codebuild_project.deploy_shared_resources_environment_stage,
+    aws_codebuild_project.deploy_cloudwatch_queries_stage,
   ]
 }
 

@@ -39,6 +39,9 @@ phases:
       # Only destroy the environment if it exists
       - |
         if [ -n "$ENVIRONMENT_DEPLOYED" ]; then
+          echo "[Destroying CloudWatch Queries]";
+          make undeploy-cloudwatch-queries PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT BLUE_GREEN_ENVIRONMENT=$BLUE_GREEN_ENVIRONMENT TF_CLI_ARGS="-parallelism=30" || echo "CloudWatch queries already destroyed or don't exist";
+          echo "[Destroying Application Stack]";
           make undeploy-blue-green-environment PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT BLUE_GREEN_ENVIRONMENT=$BLUE_GREEN_ENVIRONMENT TF_CLI_ARGS="-parallelism=30";
         fi
       -

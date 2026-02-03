@@ -30,4 +30,4 @@ phases:
       - echo AWS_ACCOUNT=$AWS_ACCOUNT
       - echo ENVIRONMENT=$ENVIRONMENT
       - echo PROFILE=$PROFILE
-      - make deploy VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT TF_CLI_ARGS="-parallelism=30"
+      - make terraform-apply-auto-approve STACKS=api-key,shared-resources,application,blue-green-link VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT TF_CLI_ARGS="-parallelism=30"

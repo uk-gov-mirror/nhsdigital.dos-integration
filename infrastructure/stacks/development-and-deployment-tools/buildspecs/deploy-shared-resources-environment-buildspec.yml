@@ -39,6 +39,10 @@ phases:
       - export CURRENT_VERSION=$(make terraform-output STACKS=blue-green-link OPTS='-raw connected_blue_green_environment' PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT | tail -n -1)
       - export PREVIOUS_VERSION=$(make terraform-output STACKS=blue-green-link OPTS='-raw previous_blue_green_environment' PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT | tail -n -1)
 
+      # Remove CloudWatch queries before unlinking
+      - echo "[Undeploying CloudWatch Queries]"
+      - make undeploy-cloudwatch-queries PROFILE=$PROFILE ENVIRONMENT=$SHARED_ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT BLUE_GREEN_ENVIRONMENT=$CURRENT_VERSION || echo "CloudWatch queries already destroyed or don't exist"
+
       # Remove the blue-green-link terraform stack to allow changes to be made to the shared resources
       - echo "[Unlink Existing Version]"
       - echo BLUE/GREEN CURRENT_VERSION=$CURRENT_VERSION

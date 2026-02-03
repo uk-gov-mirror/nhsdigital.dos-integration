@@ -16,10 +16,6 @@ fields @timestamp, correlation_id, ods_code, function_name, message
 | filter level == 'ERROR'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_correlation_id" {
@@ -40,10 +36,6 @@ fields @timestamp, message
 | filter correlation_id == 'REPLACE'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_correlation_id_expanded" {
@@ -64,10 +56,6 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter correlation_id == 'REPLACE'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_odscode" {
@@ -88,10 +76,6 @@ fields @timestamp, message
 | filter ods_code == 'REPLACE'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_odscode_expanded" {
@@ -112,10 +96,6 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter ods_code == 'REPLACE'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_for_invalid_postcode" {
@@ -130,10 +110,6 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter report_key == 'INVALID_POSTCODE'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_for_invalid_opening_times" {
@@ -148,10 +124,6 @@ fields @timestamp,correlation_id,ods_code,level,message_received,function_name, 
 | filter report_key == 'INVALID_OPEN_TIMES'
 | sort @timestamp
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_email_correlation_id" {
@@ -167,10 +139,6 @@ fields correlation_id
 | filter message =="Email Correlation Id"
 | filter email_correlation_id == "ADD_EMAIL_CORRELATION_ID"
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_update_request_success" {
@@ -185,10 +153,6 @@ fields @timestamp, correlation_id
 | filter ServiceUpdateSuccess == 1
 | sort @timestamp desc
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_update_request_failed" {
@@ -203,10 +167,6 @@ fields @timestamp, correlation_id, report_key
 | filter report_key == DOS_DB_UPDATE_DLQ_HANDLER_RECEIVED_EVENT
 | sort @timestamp desc
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_by_dos_data_item_updates" {
@@ -223,10 +183,6 @@ fields @timestamp, correlation_id
 | filter field == 'REPLACE'
 | sort @timestamp desc
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
 
 resource "aws_cloudwatch_query_definition" "search_for_report_warnings" {
@@ -248,12 +204,7 @@ fields @timestamp, correlation_id, message
 | filter level == 'WARNING'
 | sort @timestamp desc
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }
-
 
 resource "aws_cloudwatch_query_definition" "search_for_quality_checker_logs_with_odscode" {
   name = "${var.project_id}/${var.blue_green_environment}/search-for-quality-checker-logs-with-odscode"
@@ -267,8 +218,4 @@ fields @timestamp, level, message
 | filter odscode = 'TO_ADD'
 | sort @timestamp asc
 EOF
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-  }
 }

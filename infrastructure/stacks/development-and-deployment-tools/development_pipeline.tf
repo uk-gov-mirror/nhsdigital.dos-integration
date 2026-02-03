@@ -131,6 +131,38 @@ resource "aws_codepipeline" "development_pipeline" {
         }
       }
     }
+    dynamic "action" {
+      for_each = local.development_nonprod_environments
+      content {
+        name            = "Deploy_CloudWatch_Queries_${action.value["ENVIRONMENT"]}"
+        category        = "Build"
+        owner           = "AWS"
+        run_order       = 3
+        provider        = "CodeBuild"
+        input_artifacts = ["source_output"]
+        version         = "1"
+        configuration = {
+          ProjectName = aws_codebuild_project.deploy_cloudwatch_queries_stage.name
+          EnvironmentVariables = jsonencode([
+            {
+              name  = "AWS_ACCOUNT"
+              value = "${action.value["AWS_ACCOUNT"]}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "PROFILE"
+              value = "${action.value["PROFILE"]}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "SHARED_ENVIRONMENT"
+              value = "${action.value["ENVIRONMENT"]}"
+              type  = "PLAINTEXT"
+            }
+          ])
+        }
+      }
+    }
   }
   stage {
     name = "Deploy_Prod_Environments"
@@ -163,12 +195,40 @@ resource "aws_codepipeline" "development_pipeline" {
         ])
       }
     }
-
+    action {
+      name            = "Deploy_CloudWatch_Queries_Demo"
+      category        = "Build"
+      owner           = "AWS"
+      run_order       = 2
+      provider        = "CodeBuild"
+      input_artifacts = ["source_output"]
+      version         = "1"
+      configuration = {
+        ProjectName = aws_codebuild_project.deploy_cloudwatch_queries_stage.name
+        EnvironmentVariables = jsonencode([
+          {
+            name  = "AWS_ACCOUNT"
+            value = "PROD"
+            type  = "PLAINTEXT"
+          },
+          {
+            name  = "PROFILE"
+            value = "demo"
+            type  = "PLAINTEXT"
+          },
+          {
+            name  = "SHARED_ENVIRONMENT"
+            value = "demo"
+            type  = "PLAINTEXT"
+          }
+        ])
+      }
+    }
     action {
       name            = "Smoke_Test_Demo"
       category        = "Build"
       owner           = "AWS"
-      run_order       = 2
+      run_order       = 3
       provider        = "CodeBuild"
       input_artifacts = ["source_output"]
       version         = "1"
@@ -202,6 +262,7 @@ resource "aws_codepipeline" "development_pipeline" {
     aws_codebuild_project.full_deploy_stage,
     aws_codebuild_project.integration_tests,
     aws_codebuild_project.production_smoke_test,
+    aws_codebuild_project.deploy_cloudwatch_queries_stage,
   ]
 }
 
