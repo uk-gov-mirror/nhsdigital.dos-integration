@@ -30,5 +30,5 @@ phases:
       - echo AWS_ACCOUNT=$AWS_ACCOUNT
       - echo ENVIRONMENT=$ENVIRONMENT
       - echo PROFILE=$PROFILE
-      - eval "$$(make -s populate-tagging-variables)"
+      - eval "$(make -s populate-tagging-variables)"
       - make terraform-apply-auto-approve STACKS=api-key,shared-resources,application,blue-green-link VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT TF_CLI_ARGS="-parallelism=30"
