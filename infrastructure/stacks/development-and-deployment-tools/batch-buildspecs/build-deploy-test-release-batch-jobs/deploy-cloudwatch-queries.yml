@@ -25,9 +25,11 @@ phases:
       - aws sts get-caller-identity
       - make -s clean
   build:
+    on-failure: CONTINUE
     commands:
-      - echo "[Deploying]"
+      - echo "[Deploying CloudWatch Queries]"
       - echo AWS_ACCOUNT=$AWS_ACCOUNT
       - echo ENVIRONMENT=$ENVIRONMENT
       - echo PROFILE=$PROFILE
-      - make terraform-apply-auto-approve STACKS=api-key,shared-resources,application,blue-green-link VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT TF_CLI_ARGS="-parallelism=30"
+      - eval "$(make -s populate-tagging-variables)"
+      - make deploy-cloudwatch-queries VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT

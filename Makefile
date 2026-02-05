@@ -34,9 +34,11 @@ build-and-push: # Build lambda docker images and pushes them to ECR
 deploy: # Deploys whole project - mandatory: PROFILE
 	eval "$$(make -s populate-tagging-variables)"
 	make terraform-apply-auto-approve STACKS=api-key,shared-resources,application,blue-green-link
+	make terraform-apply-auto-approve STACKS=cloudwatch-queries TF_CLI_ARGS="-parallelism=3"
 
 undeploy: # Undeploys whole project - mandatory: PROFILE
 	eval "$$(make -s populate-tagging-variables)"
+	make terraform-destroy-auto-approve STACKS=cloudwatch-queries
 	make terraform-destroy-auto-approve STACKS=blue-green-link,application,shared-resources VERSION=any
 	if [ "$(PROFILE)" != "live" ]; then
 		make terraform-destroy-auto-approve STACKS=api-key
@@ -464,6 +466,10 @@ link-blue-green-environment: # Links blue green environment - mandatory: PROFILE
 	eval "$$(make -s populate-tagging-variables)"
 	make terraform-apply-auto-approve STACKS=blue-green-link
 
+deploy-cloudwatch-queries: # Deploys CloudWatch query definitions with reduced parallelism - mandatory: PROFILE, ENVIRONMENT, SHARED_ENVIRONMENT, BLUE_GREEN_ENVIRONMENT
+	eval "$$(make -s populate-tagging-variables)"
+	make terraform-apply-auto-approve STACKS=cloudwatch-queries TF_CLI_ARGS="-parallelism=3"
+
 undeploy-shared-resources: # Undeploys shared resources (Only intended to run in pipeline) - mandatory: PROFILE, ENVIRONMENT, SHARED_ENVIRONMENT, BLUE_GREEN_ENVIRONMENT
 	eval "$$(make -s populate-tagging-variables)"
 	make terraform-destroy-auto-approve STACKS=shared-resources
@@ -474,6 +480,10 @@ undeploy-shared-resources: # Undeploys shared resources (Only intended to run in
 undeploy-blue-green-environment: # Undeploys blue/green resources (Only intended to run in pipeline) - mandatory: PROFILE, ENVIRONMENT, SHARED_ENVIRONMENT, BLUE_GREEN_ENVIRONMENT
 	eval "$$(make -s populate-tagging-variables)"
 	make terraform-destroy-auto-approve STACKS=application
+
+undeploy-cloudwatch-queries: # Undeploys CloudWatch query definitions - mandatory: PROFILE, ENVIRONMENT, SHARED_ENVIRONMENT, BLUE_GREEN_ENVIRONMENT
+	eval "$$(make -s populate-tagging-variables)"
+	make terraform-destroy-auto-approve STACKS=cloudwatch-queries
 
 unlink-blue-green-environment: # Un-Links blue green environment - mandatory: PROFILE, ENVIRONMENT, SHARED_ENVIRONMENT, BLUE_GREEN_ENVIRONMENT
 	eval "$$(make -s populate-tagging-variables)"

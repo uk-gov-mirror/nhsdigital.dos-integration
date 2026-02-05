@@ -1,6 +1,13 @@
 # For documentation see here - https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html
 version: 0.2
 
+# This buildspec deploys CloudWatch query definitions for a specific blue-green environment.
+# Required environment variables (passed from pipeline):
+# - PROFILE: The deployment profile (e.g., dev, demo, live)
+# - SHARED_ENVIRONMENT: The shared environment name
+# - BLUE_GREEN_ENVIRONMENT: The blue-green environment identifier (will be derived from SSM parameter)
+# - AWS_ACCOUNT: The AWS account type (NONPROD or PROD)
+
 phases:
   pre_build:
     commands:
@@ -26,8 +33,12 @@ phases:
       - make -s clean
   build:
     commands:
-      - echo "[Deploying]"
-      - echo AWS_ACCOUNT=$AWS_ACCOUNT
-      - echo ENVIRONMENT=$ENVIRONMENT
+      # Get the current blue-green environment from the blue-green-link stack
+      - echo "[Getting Current Blue-Green Environment]"
+      - export ENVIRONMENT=$SHARED_ENVIRONMENT
+      - export BLUE_GREEN_ENVIRONMENT=$(make terraform-output STACKS=blue-green-link OPTS='-raw connected_blue_green_environment' PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT | tail -n -1)
+      - echo "[Deploying CloudWatch Queries]"
       - echo PROFILE=$PROFILE
-      - make terraform-apply-auto-approve STACKS=api-key,shared-resources,application,blue-green-link VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION PROFILE=$PROFILE ENVIRONMENT=$ENVIRONMENT TF_CLI_ARGS="-parallelism=30"
+      - echo SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT
+      - echo BLUE_GREEN_ENVIRONMENT=$BLUE_GREEN_ENVIRONMENT
+      - make deploy-cloudwatch-queries PROFILE=$PROFILE ENVIRONMENT=$SHARED_ENVIRONMENT SHARED_ENVIRONMENT=$SHARED_ENVIRONMENT BLUE_GREEN_ENVIRONMENT=$BLUE_GREEN_ENVIRONMENT
