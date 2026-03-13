@@ -206,37 +206,6 @@ data "aws_iam_policy_document" "quality_checker_policy" {
   }
 }
 
-data "aws_iam_policy_document" "send_email_policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt",
-    ]
-    resources = [
-      data.aws_kms_key.signing_key.arn,
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-    ]
-    resources = [
-      "arn:aws:s3:::${var.send_email_bucket_name}",
-      "arn:aws:s3:::${var.send_email_bucket_name}/*",
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "secretsmanager:GetSecretValue",
-    ]
-    resources = [
-      "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:${var.project_deployment_secrets}",
-    ]
-  }
-}
-
 data "aws_iam_policy_document" "service_matcher_policy" {
   statement {
     effect = "Allow"
@@ -347,24 +316,6 @@ data "aws_iam_policy_document" "service_sync_policy" {
     ]
     resources = [
       "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/${var.change_events_table_name}/index/gsi_ods_sequence",
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "s3:PutObject",
-    ]
-    resources = [
-      "arn:aws:s3:::${var.send_email_bucket_name}/*",
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "lambda:InvokeFunction",
-    ]
-    resources = [
-      "arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:${var.send_email_lambda}",
     ]
   }
 }

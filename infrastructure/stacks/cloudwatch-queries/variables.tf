@@ -22,11 +22,6 @@ variable "ingest_change_event_lambda" {
   description = "Name of ingest change event lambda"
 }
 
-variable "send_email_lambda" {
-  type        = string
-  description = "Name of send email lambda"
-}
-
 variable "service_matcher_lambda" {
   type        = string
   description = "Name of event processor lambda"

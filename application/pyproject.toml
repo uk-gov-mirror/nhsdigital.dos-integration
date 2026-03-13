@@ -16,4 +16,7 @@ ignore_names = [
   "metadata",
   "recipient_email_address",
   "recipient_id",
+  "unhandled_exception_logging_hidden_event",
+  "creatorsname",
+  "email"
 ]

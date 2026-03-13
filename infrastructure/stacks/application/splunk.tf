@@ -30,14 +30,6 @@ resource "aws_cloudwatch_log_subscription_filter" "ingest_change_event_logs_subs
   destination_arn = data.aws_kinesis_firehose_delivery_stream.dos_integration_firehose.arn
 }
 
-resource "aws_cloudwatch_log_subscription_filter" "send_email_logs_subscription_filter" {
-  name            = var.send_email_subscription_filter_name
-  role_arn        = data.aws_iam_role.di_firehose_role.arn
-  log_group_name  = module.send_email_lambda.lambda_cloudwatch_log_group_name
-  filter_pattern  = "{ $.level = \"ERROR\" || $.level = \"WARNING\" || $.level = \"CRITICAL\" }"
-  destination_arn = data.aws_kinesis_firehose_delivery_stream.dos_integration_firehose.arn
-}
-
 resource "aws_cloudwatch_log_subscription_filter" "service_matcher_logs_subscription_filter" {
   name            = var.service_matcher_subscription_filter_name
   role_arn        = data.aws_iam_role.di_firehose_role.arn

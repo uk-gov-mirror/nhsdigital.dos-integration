@@ -186,53 +186,6 @@ resource "aws_cloudwatch_metric_alarm" "ingest_change_event_error_rate_alert" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "send_email_error_rate_alert" {
-  alarm_actions             = [data.aws_sns_topic.sns_topic_app_alerts_for_slack_default_region.arn]
-  alarm_description         = "Send Email error rate has exceeded 1%"
-  alarm_name                = "${var.project_id} | ${var.blue_green_environment} | Send Email Error Rate"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = "2"
-  threshold                 = "1"
-  insufficient_data_actions = []
-  treat_missing_data        = "ignore"
-  ok_actions                = var.profile == "dev" ? [] : [data.aws_sns_topic.sns_topic_app_alerts_for_slack_default_region.arn]
-
-  metric_query {
-    id          = "expression"
-    expression  = "(errors/invocations) * 100"
-    label       = "Error Rate (%)"
-    return_data = "true"
-  }
-
-  metric_query {
-    id = "errors"
-    metric {
-      metric_name = "Errors"
-      namespace   = "AWS/Lambda"
-      period      = "120"
-      stat        = "Sum"
-      unit        = "Count"
-      dimensions = {
-        FunctionName = var.send_email_lambda
-      }
-    }
-  }
-
-  metric_query {
-    id = "invocations"
-    metric {
-      metric_name = "Invocations"
-      namespace   = "AWS/Lambda"
-      period      = "120"
-      stat        = "Sum"
-      unit        = "Count"
-      dimensions = {
-        FunctionName = var.send_email_lambda
-      }
-    }
-  }
-}
-
 resource "aws_cloudwatch_metric_alarm" "service_matcher_error_rate_alert" {
   alarm_actions             = [data.aws_sns_topic.sns_topic_app_alerts_for_slack_default_region.arn]
   alarm_description         = "Service Matcher error rate has exceeded 1%"

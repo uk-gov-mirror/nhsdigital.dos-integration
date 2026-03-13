@@ -1,21 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
-from json import JSONDecodeError, dumps, loads
-from os import environ
-from time import time_ns
+from json import JSONDecodeError, loads
 from typing import Self
 from zoneinfo import ZoneInfo
 
 from aws_lambda_powertools.logging import Logger
-from boto3 import client
 from psycopg import Connection
 from psycopg.rows import DictRow
 
 from ..service_update_logger import ServiceUpdateLogger
-from .s3 import put_content_to_s3
 from common.constants import DI_CHANGE_ITEMS, DOS_INTEGRATION_USER_NAME
 from common.dos_db_connection import connect_to_db_writer, query_dos_db
-from common.types import EmailFile, EmailMessage
 
 logger = Logger(child=True)
 
@@ -91,8 +86,7 @@ def check_and_remove_pending_dos_changes(service_id: str) -> None:
             reject_pending_changes(connection=connection, pending_changes=pending_changes)
             connection.commit()
             log_rejected_changes(pending_changes)
-            send_rejection_emails(pending_changes)
-            logger.info("All pending changes rejected and emails sent")
+            logger.info("All pending changes rejected")
         else:
             logger.info("No valid pending changes found")
 
@@ -173,85 +167,3 @@ def log_rejected_changes(pending_changes: list[PendingChange]) -> None:
             type_id=pending_change.typeid,
             odscode="",
         ).log_rejected_change(pending_change.id)
-
-
-def send_rejection_emails(pending_changes: list[PendingChange]) -> None:
-    """Sends rejection emails to the users who created the pending changes.
-
-    Args:
-        pending_changes (List[PendingChange]): The pending changes to send rejection emails for
-    """
-    subject = "Your DoS Change has been rejected"
-    for pending_change in pending_changes:
-        file_name = f"rejection-emails/rejection-email-{time_ns()}.json"
-        file_contents = build_change_rejection_email_contents(pending_change, file_name)
-        correlation_id: str = logger.get_correlation_id()
-        email_file = EmailFile(
-            correlation_id=correlation_id,
-            email_body=file_contents,
-            email_subject=subject,
-            user_id=pending_change.user_id,
-        )
-        logger.info("Email file created", subject=subject, user_id=pending_change.user_id)
-        put_content_to_s3(content=dumps(email_file), s3_filename=file_name)
-        logger.info("File contents uploaded to S3")
-        file_contents = file_contents.replace("{{InitiatorName}}", pending_change.creatorsname)
-        message = EmailMessage(
-            change_id=pending_change.id,
-            correlation_id=correlation_id,
-            email_body=file_contents,
-            email_subject=subject,
-            recipient_email_address=pending_change.email,
-            s3_filename=file_name,
-            user_id=pending_change.user_id,
-        )
-        logger.debug("Email message created")
-        client("lambda").invoke(
-            FunctionName=environ["SEND_EMAIL_LAMBDA"],
-            InvocationType="Event",
-            Payload=dumps(message),
-        )
-        logger.info("Send email lambda invoked")
-
-
-def build_change_rejection_email_contents(pending_change: PendingChange, file_name: str) -> str:
-    """Builds the contents of the change rejection email.
-
-    Args:
-        pending_change (PendingChange): The pending change to build the email for
-        file_name (str): The name of the file to upload to S3
-
-    Returns:
-        str: The contents of the email
-    """
-    with open("service_sync/reject_pending_changes/rejection-email.html") as email_template:
-        file_contents = email_template.read()
-        email_template.close()
-    email_correlation_id = f"{pending_change.uid}-{time_ns()}"
-    file_contents = file_contents.replace("{{ServiceName}}", pending_change.name)
-    file_contents = file_contents.replace("{{ServiceUid}}", pending_change.uid)
-    file_contents = file_contents.replace("{{EmailCorrelationId}}", email_correlation_id)
-    file_contents = file_contents.replace("{{DiTeamEmail}}", environ.get("TEAM_EMAIL_ADDRESS", ""))
-    logger.info("Email Correlation Id", email_correlation_id=email_correlation_id, file_name=file_name)
-    json_value = loads(pending_change.value)
-    for change_key, value in json_value["new"].items():
-        # Add a new change row to the table in the email
-        row = TABLE_ROW
-        row = row.replace("{{change_key}}", change_key)
-        row = row.replace("{{previous}}", str(value.get("previous")))
-        row = row.replace("{{new}}", str(value.get("data")))
-        file_contents = file_contents.replace("{{row}}", row)
-    # Remove the placeholder row
-    file_contents = file_contents.replace("{{row}}", " ")
-    # Remove the \n characters from the HTML
-    return file_contents.replace("\n", " ")
-
-
-TABLE_ROW: str = """
-        <tr>
-            <td>{{change_key}}</td>
-            <td>{{previous}}</td>
-            <td>{{new}}</td>
-        </tr>
-        {{row}}
-    """

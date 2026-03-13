@@ -231,7 +231,7 @@ Integration Testing is used to test the functional capabilities of the individua
 
 This testing includes:
 
-- No Mocking. Except Emails which are mocked in NonProd
+- No Mocking.
 - Check data when passed between components
 - Meets business needs of the application
 

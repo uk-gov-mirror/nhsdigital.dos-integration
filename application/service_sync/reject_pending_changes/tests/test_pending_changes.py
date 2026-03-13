@@ -1,19 +1,16 @@
 from json import dumps
-from os import environ
 from random import choices
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 import pytest
 
 from application.service_sync.reject_pending_changes.pending_changes import (
     PendingChange,
-    build_change_rejection_email_contents,
     check_and_remove_pending_dos_changes,
     get_pending_changes,
     log_rejected_changes,
     reject_pending_changes,
-    send_rejection_emails,
 )
 
 FILE_PATH = "application.service_sync.reject_pending_changes.pending_changes"
@@ -97,7 +94,6 @@ def test_pending_change_is_valid_exception() -> None:
     assert False is is_valid
 
 
-@patch(f"{FILE_PATH}.send_rejection_emails")
 @patch(f"{FILE_PATH}.log_rejected_changes")
 @patch(f"{FILE_PATH}.reject_pending_changes")
 @patch(f"{FILE_PATH}.get_pending_changes")
@@ -107,7 +103,6 @@ def test_check_and_remove_pending_dos_changes(
     mock_get_pending_changes: MagicMock,
     mock_reject_pending_changes: MagicMock,
     mock_log_rejected_changes: MagicMock,
-    mock_send_rejection_emails: MagicMock,
 ) -> None:
     # Arrange
     service_id = "test"
@@ -126,10 +121,8 @@ def test_check_and_remove_pending_dos_changes(
         pending_changes=get_pending_changes_response,
     )
     mock_log_rejected_changes.assert_called_once_with(get_pending_changes_response)
-    mock_send_rejection_emails.assert_called_once_with(get_pending_changes_response)
 
 
-@patch(f"{FILE_PATH}.send_rejection_emails")
 @patch(f"{FILE_PATH}.log_rejected_changes")
 @patch(f"{FILE_PATH}.reject_pending_changes")
 @patch(f"{FILE_PATH}.get_pending_changes")
@@ -139,7 +132,6 @@ def test_check_and_remove_pending_dos_changes_no_pending_changes(
     mock_get_pending_changes: MagicMock,
     mock_reject_pending_changes: MagicMock,
     mock_log_rejected_changes: MagicMock,
-    mock_send_rejection_emails: MagicMock,
 ) -> None:
     # Arrange
     service_id = "test"
@@ -155,10 +147,8 @@ def test_check_and_remove_pending_dos_changes_no_pending_changes(
     )
     mock_reject_pending_changes.assert_not_called()
     mock_log_rejected_changes.assert_not_called()
-    mock_send_rejection_emails.assert_not_called()
 
 
-@patch(f"{FILE_PATH}.send_rejection_emails")
 @patch(f"{FILE_PATH}.log_rejected_changes")
 @patch(f"{FILE_PATH}.reject_pending_changes")
 @patch(f"{FILE_PATH}.get_pending_changes")
@@ -168,7 +158,6 @@ def test_check_and_remove_pending_dos_changes_invalid_changes(
     mock_get_pending_changes: MagicMock,
     mock_reject_pending_changes: MagicMock,
     mock_log_rejected_changes: MagicMock,
-    mock_send_rejection_emails: MagicMock,
 ) -> None:
     # Arrange
     service_id = "test"
@@ -184,7 +173,6 @@ def test_check_and_remove_pending_dos_changes_invalid_changes(
     )
     mock_reject_pending_changes.assert_not_called()
     mock_log_rejected_changes.assert_not_called()
-    mock_send_rejection_emails.assert_not_called()
 
 
 @patch(f"{FILE_PATH}.PendingChange.__repr__")
@@ -326,79 +314,3 @@ def test_log_rejected_changes(capsys: pytest.CaptureFixture) -> None:
         f"org_name={pending_change.name}|change_status=PENDING|info=change rejected|"
         "execution_time=NULL"
     ) in captured.err
-
-
-@patch(f"{FILE_PATH}.client")
-@patch(f"{FILE_PATH}.EmailMessage")
-@patch(f"{FILE_PATH}.build_change_rejection_email_contents")
-@patch(f"{FILE_PATH}.time_ns")
-@patch(f"{FILE_PATH}.dumps")
-@patch("builtins.open")
-@patch(f"{FILE_PATH}.put_content_to_s3")
-def test_send_rejection_emails(
-    mock_put_content_to_s3: MagicMock,
-    mock_open: MagicMock,
-    mock_dumps: MagicMock,
-    mock_time_ns: MagicMock,
-    mock_build_change_rejection_email_contents: MagicMock,
-    mock_email_message: MagicMock,
-    mock_client: MagicMock,
-) -> None:
-    # Arrange
-    environ["SEND_EMAIL_LAMBDA"] = send_email_lambda_name = "test"
-    pending_change = PendingChange(ROW)
-    pending_changes = [pending_change]
-    mock_build_change_rejection_email_contents.return_value = file_contents = "test"
-    expected_subject = "Your DoS Change has been rejected"
-    # Act
-    response = send_rejection_emails(pending_changes)
-    # Assert
-    assert None is response
-    mock_dumps.assert_has_calls(
-        calls=[
-            call(
-                {
-                    "correlation_id": None,
-                    "user_id": pending_change.user_id,
-                    "email_body": mock_build_change_rejection_email_contents.return_value,
-                    "email_subject": expected_subject,
-                },
-            ),
-            call(mock_email_message.return_value),
-        ],
-    )
-    mock_put_content_to_s3.assert_called_once_with(
-        content=mock_dumps.return_value,
-        s3_filename=f"rejection-emails/rejection-email-{mock_time_ns.return_value}.json",
-    )
-    mock_email_message.assert_called_once_with(
-        change_id=pending_change.id,
-        correlation_id=None,
-        recipient_email_address=pending_change.email,
-        email_body=file_contents,
-        email_subject=expected_subject,
-        s3_filename=f"rejection-emails/rejection-email-{mock_time_ns.return_value}.json",
-        user_id=pending_change.user_id,
-    )
-    mock_client.assert_called_once_with("lambda")
-    mock_client.return_value.invoke.assert_called_once_with(
-        FunctionName=send_email_lambda_name,
-        InvocationType="Event",
-        Payload=mock_dumps.return_value,
-    )
-    # Cleanup
-    del environ["SEND_EMAIL_LAMBDA"]
-
-
-@patch("builtins.open")
-def test_build_change_rejection_email_contents(mock_open: MagicMock) -> None:
-    # Arrange
-    pending_change = PendingChange(ROW)
-    pending_change.value = '{"new":{"cmsurl":{"previous":"test.com","data":"https://www.test.com"}}}'
-    # Act
-    response = build_change_rejection_email_contents(pending_change, "test_file")
-    # Assert
-    assert (
-        response
-        == mock_open.return_value.__enter__.return_value.read.return_value.replace.return_value.replace.return_value.replace.return_value.replace.return_value.replace.return_value.replace.return_value.replace.return_value  # noqa: E501
-    )

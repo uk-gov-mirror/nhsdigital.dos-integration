@@ -100,23 +100,6 @@ resource "aws_cloudwatch_metric_alarm" "high_number_of_update_requests_waiting_a
   threshold                 = "30000" # 30 Seconds
 }
 
-resource "aws_cloudwatch_metric_alarm" "high_number_of_failed_emails_alert" {
-  count                     = can(regex("ds-*", var.blue_green_environment)) ? 0 : 1
-  alarm_actions             = [data.aws_sns_topic.sns_topic_app_alerts_for_slack_default_region.arn]
-  alarm_description         = "Alert for when DI is failing to send emails"
-  alarm_name                = "${var.project_id} | ${var.blue_green_environment} | Failed Emails"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  datapoints_to_alarm       = "1"
-  dimensions                = { environment = var.blue_green_environment }
-  evaluation_periods        = "1"
-  insufficient_data_actions = []
-  metric_name               = "EmailFailed"
-  namespace                 = "uec-dos-int"
-  period                    = "120" # 2 minutes
-  statistic                 = "Sum"
-  threshold                 = "1"
-}
-
 resource "aws_cloudwatch_metric_alarm" "average_message_latency_alert" {
   count                     = can(regex("ds-*", var.blue_green_environment)) ? 0 : 1
   alarm_actions             = [data.aws_sns_topic.sns_topic_app_alerts_for_slack_default_region.arn]

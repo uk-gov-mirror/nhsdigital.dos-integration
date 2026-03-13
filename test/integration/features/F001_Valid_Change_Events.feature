@@ -143,16 +143,6 @@ Feature: F001. Ensure valid change events are converted and sent to DoS
     When the Changed Event is sent for processing with "valid" api key
     Then the service history table has been updated with locations data
 
-  @complete @general
-  Scenario: F001SX11. To check the emails sending
-    Given a basic service is created
-    And the correlation-id is "email"
-    And the change event "Address1" is set to "Test Address"
-    And a pending entry exists in the changes table for this service
-    When the Changed Event is sent for processing with "valid" api key
-    Then the s3 bucket contains an email file matching the service uid
-    And the changes table shows change is now rejected
-
   @complete @opening_times
   Scenario: F001SX12. Past Specified Opening Times on Dos are removed and updated
     Given an entry is created in the services table
