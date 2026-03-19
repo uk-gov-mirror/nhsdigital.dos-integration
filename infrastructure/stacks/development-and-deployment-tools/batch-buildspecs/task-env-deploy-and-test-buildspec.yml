@@ -149,7 +149,7 @@ batch:
           PARALLEL_TEST_COUNT: 20
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
 
     - identifier: integration_test_validation
       env:
@@ -163,7 +163,7 @@ batch:
           PARALLEL_TEST_COUNT: 40
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
 
     - identifier: integration_test_opening_times
       env:
@@ -177,7 +177,7 @@ batch:
           PARALLEL_TEST_COUNT: 40
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
 
     - identifier: integration_test_general
       env:
@@ -191,4 +191,4 @@ batch:
           PARALLEL_TEST_COUNT: 40
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
