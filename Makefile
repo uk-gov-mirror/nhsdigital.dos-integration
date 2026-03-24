@@ -78,7 +78,6 @@ UNIT_TEST_ARGS=" \
 		--volume $(APPLICATION_DIR)/dos_db_update_dlq_handler:/tmp/.packages/dos_db_update_dlq_handler \
 		--volume $(APPLICATION_DIR)/event_replay:/tmp/.packages/event_replay \
 		--volume $(APPLICATION_DIR)/ingest_change_event:/tmp/.packages/ingest_change_event \
-		--volume $(APPLICATION_DIR)/send_email:/tmp/.packages/send_email \
 		--volume $(APPLICATION_DIR)/service_matcher:/tmp/.packages/service_matcher \
 		--volume $(APPLICATION_DIR)/service_sync:/tmp/.packages/service_sync \
 		--volume $(APPLICATION_DIR)/slack_messenger:/tmp/.packages/slack_messenger \
@@ -160,12 +159,6 @@ ingest-change-event-build-and-deploy: ### Build and deploy ingest change event l
 	make build-and-deploy-single-function FUNCTION_NAME=ingest-change-event INGEST_CHANGE_EVENT_VERSION=$(BUILD_TAG) VERSION=$(BUILD_TAG)
 
 # ==============================================================================
-# Send Email
-
-send-email-build-and-deploy: ### Build and deploy send email lambda docker image - mandatory: PROFILE, ENVIRONMENT
-	make build-and-deploy-single-function FUNCTION_NAME=send-email SEND_EMAIL_VERSION=$(BUILD_TAG) VERSION=$(BUILD_TAG)
-
-# ==============================================================================
 # Service Matcher
 
 service-matcher-build-and-deploy: ### Build and deploy service matcher lambda docker image - mandatory: PROFILE, ENVIRONMENT
@@ -217,7 +210,6 @@ get-lambda-versions-if-empty:
 	[[ -z "$$DOS_DB_UPDATE_DLQ_HANDLER_VERSION" ]] && echo "export DOS_DB_UPDATE_DLQ_HANDLER_VERSION=$$(echo $$VERSIONS | jq -r '.dos_db_update_dlq_handler')"
 	[[ -z "$$EVENT_REPLAY_VERSION" ]] && echo "export EVENT_REPLAY_VERSION=$$(echo $$VERSIONS | jq -r '.event_replay')"
 	[[ -z "$$INGEST_CHANGE_EVENT_VERSION" ]] && echo "export INGEST_CHANGE_EVENT_VERSION=$$(echo $$VERSIONS | jq -r '.ingest_change_event')"
-	[[ -z "$$SEND_EMAIL_VERSION" ]] && echo "export SEND_EMAIL_VERSION=$$(echo $$VERSIONS | jq -r '.send_email')"
 	[[ -z "$$SERVICE_MATCHER_VERSION" ]] && echo "export SERVICE_MATCHER_VERSION=$$(echo $$VERSIONS | jq -r '.service_matcher')"
 	[[ -z "$$SERVICE_SYNC_VERSION" ]] && echo "export SERVICE_SYNC_VERSION=$$(echo $$VERSIONS | jq -r '.service_sync')"
 	[[ -z "$$SLACK_MESSENGER_VERSION" ]] && echo "export SLACK_MESSENGER_VERSION=$$(echo $$VERSIONS | jq -r '.slack_messenger')"

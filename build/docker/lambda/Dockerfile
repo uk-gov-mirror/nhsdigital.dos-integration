@@ -1,6 +1,9 @@
 FROM public.ecr.aws/lambda/python:3.14-arm64
-# Update Pip
-RUN python -m pip install --upgrade pip
+# Apply OS updates and update Pip
+RUN dnf upgrade -y \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf \
+    && python -m pip install --upgrade pip
 # Copy Python requirements
 COPY assets/requirements.txt /
 # Install Python requirements

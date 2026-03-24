@@ -133,11 +133,6 @@ variable "sns_topic_app_alerts_for_slack_route53_health_check_alarm_region" {
 # # S3
 # ##############
 
-variable "send_email_bucket_name" {
-  type        = string
-  description = "Name of the bucket to temporarily store emails to be sent"
-}
-
 # ##############
 # # FIREHOSE
 # ##############
@@ -175,13 +170,6 @@ variable "event_replay_subscription_filter_name" {
 variable "slack_messenger_subscription_filter_name" {
   type        = string
   description = "Log filter name for slack messenger lambda"
-}
-
-
-variable "send_email_subscription_filter_name" {
-  type = string
-
-  description = "Log filter name for send email lambda"
 }
 
 variable "ingest_change_event_subscription_filter_name" {
@@ -243,11 +231,6 @@ variable "ingest_change_event_lambda" {
   description = "Name of ingest change event lambda"
 }
 
-variable "send_email_lambda" {
-  type        = string
-  description = "Name of send email lambda"
-}
-
 variable "service_matcher_lambda" {
   type        = string
   description = "Name of event processor lambda"
@@ -295,11 +278,6 @@ variable "event_replay" {
 variable "ingest_change_event" {
   type        = string
   description = "Name of ingest change event docker image"
-}
-
-variable "send_email" {
-  type        = string
-  description = "Name of send email docker image"
 }
 
 variable "service_matcher" {
@@ -350,11 +328,6 @@ variable "event_replay_version" {
 variable "ingest_change_event_version" {
   type        = string
   description = "Version of ingest change event docker image"
-}
-
-variable "send_email_version" {
-  type        = string
-  description = "Version of send email docker image"
 }
 
 variable "service_matcher_version" {

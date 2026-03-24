@@ -17,7 +17,6 @@ from .functions.assertions import assert_standard_closing, assert_standard_openi
 from .functions.aws.aws_lambda import invoke_quality_checker_lambda, re_process_payload
 from .functions.aws.cloudwatch import get_logs, negative_log_check
 from .functions.aws.dynamodb import get_latest_sequence_id_for_a_given_odscode, get_stored_events_from_dynamo_db
-from .functions.aws.s3 import get_s3_email_file
 from .functions.aws.sqs import post_to_change_event_dlq, post_ur_fifo, post_ur_sqs
 from .functions.context import Context
 from .functions.dos.check_data import (
@@ -1604,17 +1603,6 @@ def services_location_history_update_assertion(context: Context) -> None:
     location_data = get_locations_table_data(context.change_event["Postcode"])
     location_data = list(location_data[0].values())[:-2]
     assert history_list == location_data, "ERROR: Service History and Location data does not match"
-
-
-@then("the s3 bucket contains an email file matching the service uid")
-def check_s3_contains_email_file(context: Context) -> None:
-    """Assert the s3 bucket contains an email file matching the service uid.
-
-    Args:
-        context (Context): The context object.
-    """
-    get_s3_email_file(context)
-    assert context.service_uid in context.other["email_body"], "ERROR: service_uid not found in email body"
 
 
 @then("the changes table shows change is now rejected")

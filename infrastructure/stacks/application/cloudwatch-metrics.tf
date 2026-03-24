@@ -89,36 +89,6 @@ resource "aws_cloudwatch_log_metric_filter" "quality_checker_errored" {
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "email_sent" {
-  name           = "${var.project_id}-${var.blue_green_environment}-email-sent"
-  pattern        = "{ $.cloudwatch_metric_filter_matching_attribute = \"EmailSent\" }"
-  log_group_name = module.send_email_lambda.lambda_cloudwatch_log_group_name
-
-  metric_transformation {
-    name      = "EmailSent"
-    namespace = "uec-dos-int"
-    value     = "1"
-    dimensions = {
-      environment = "$.environment"
-    }
-  }
-}
-
-resource "aws_cloudwatch_log_metric_filter" "email_failed" {
-  name           = "${var.project_id}-${var.blue_green_environment}-email-failed"
-  pattern        = "{ $.cloudwatch_metric_filter_matching_attribute = \"EmailFailed\" }"
-  log_group_name = module.send_email_lambda.lambda_cloudwatch_log_group_name
-
-  metric_transformation {
-    name      = "EmailFailed"
-    namespace = "uec-dos-int"
-    value     = "1"
-    dimensions = {
-      environment = "$.environment"
-    }
-  }
-}
-
 resource "aws_cloudwatch_log_metric_filter" "invalid_open_times" {
   name           = "${var.project_id}-${var.blue_green_environment}-invalid-open-times"
   pattern        = "{ $.cloudwatch_metric_filter_matching_attribute = \"InvalidOpenTimes\" }"

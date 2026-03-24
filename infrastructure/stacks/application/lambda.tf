@@ -214,48 +214,6 @@ module "ingest_change_event_lambda" {
   }
 }
 
-module "send_email_lambda" {
-  source  = "terraform-aws-modules/lambda/aws"
-  version = "v8.1.0"
-
-  function_name = var.send_email_lambda
-  description   = "Send Email lambda"
-
-  create_package         = false
-  image_uri              = "${var.docker_registry}/${var.send_email}:${var.send_email_version}"
-  package_type           = "Image"
-  timeout                = 30
-  memory_size            = 128
-  architectures          = ["arm64"]
-  kms_key_arn            = data.aws_kms_key.signing_key.arn
-  tracing_mode           = "Active"
-  maximum_retry_attempts = 2
-
-  cloudwatch_logs_kms_key_id        = data.aws_kms_key.signing_key.arn
-  cloudwatch_logs_retention_in_days = 30
-
-  role_name        = "${var.send_email_lambda}-role"
-  role_description = "Role for Lambda function ${var.send_email_lambda}"
-
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.send_email_policy.json
-
-  environment_variables = {
-    "PROFILE"                            = var.profile
-    "ENVIRONMENT"                        = var.blue_green_environment
-    "SHARED_ENVIRONMENT"                 = var.shared_environment
-    "POWERTOOLS_SERVICE_NAME"            = var.lambda_powertools_service_name
-    "POWERTOOLS_TRACER_CAPTURE_RESPONSE" = true
-    "POWERTOOLS_TRACER_CAPTURE_ERROR"    = true
-    "POWERTOOLS_TRACE_MIDDLEWARES"       = true
-    "LOG_LEVEL"                          = var.log_level
-    "IMAGE_VERSION"                      = var.send_email_version
-    "AWS_ACCOUNT_NAME"                   = var.aws_account_name
-    "SYSTEM_EMAIL_ADDRESS"               = local.project_system_email_address
-    "EMAIL_SECRET_NAME"                  = var.project_deployment_secrets
-  }
-}
-
 module "service_matcher_lambda" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "v8.1.0"
@@ -362,10 +320,8 @@ module "service_sync_lambda" {
     "DB_WRITER_SECRET_NAME"              = var.dos_db_writer_secret_name
     "DB_WRITER_SECRET_KEY"               = var.dos_db_writer_secret_key
     "DB_READ_AND_WRITE_USER_NAME"        = local.dos_db_read_and_write_user_name
-    "SEND_EMAIL_BUCKET_NAME"             = var.send_email_bucket_name
     "TEAM_EMAIL_ADDRESS"                 = local.project_team_email_address
     "SYSTEM_EMAIL_ADDRESS"               = local.project_system_email_address
-    "SEND_EMAIL_LAMBDA_NAME"             = var.send_email_lambda
     "AWS_ACCOUNT_ID"                     = tostring(var.aws_account_id)
   }
 }

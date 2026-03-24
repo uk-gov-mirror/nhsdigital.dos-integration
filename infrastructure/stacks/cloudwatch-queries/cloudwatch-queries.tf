@@ -6,7 +6,6 @@ resource "aws_cloudwatch_query_definition" "search_for_errors" {
     "/aws/lambda/${var.dos_db_update_dlq_handler_lambda}",
     "/aws/lambda/${var.event_replay_lambda}",
     "/aws/lambda/${var.ingest_change_event_lambda}",
-    "/aws/lambda/${var.send_email_lambda}",
     "/aws/lambda/${var.service_matcher_lambda}",
     "/aws/lambda/${var.service_sync_lambda}"
   ]
@@ -26,7 +25,6 @@ resource "aws_cloudwatch_query_definition" "search_by_correlation_id" {
     "/aws/lambda/${var.dos_db_update_dlq_handler_lambda}",
     "/aws/lambda/${var.event_replay_lambda}",
     "/aws/lambda/${var.ingest_change_event_lambda}",
-    "/aws/lambda/${var.send_email_lambda}",
     "/aws/lambda/${var.service_matcher_lambda}",
     "/aws/lambda/${var.service_sync_lambda}"
   ]
@@ -46,7 +44,6 @@ resource "aws_cloudwatch_query_definition" "search_by_correlation_id_expanded" {
     "/aws/lambda/${var.dos_db_update_dlq_handler_lambda}",
     "/aws/lambda/${var.event_replay_lambda}",
     "/aws/lambda/${var.ingest_change_event_lambda}",
-    "/aws/lambda/${var.send_email_lambda}",
     "/aws/lambda/${var.service_matcher_lambda}",
     "/aws/lambda/${var.service_sync_lambda}"
   ]
@@ -66,7 +63,6 @@ resource "aws_cloudwatch_query_definition" "search_by_odscode" {
     "/aws/lambda/${var.dos_db_update_dlq_handler_lambda}",
     "/aws/lambda/${var.event_replay_lambda}",
     "/aws/lambda/${var.ingest_change_event_lambda}",
-    "/aws/lambda/${var.send_email_lambda}",
     "/aws/lambda/${var.service_matcher_lambda}",
     "/aws/lambda/${var.service_sync_lambda}"
   ]
@@ -86,7 +82,6 @@ resource "aws_cloudwatch_query_definition" "search_by_odscode_expanded" {
     "/aws/lambda/${var.dos_db_update_dlq_handler_lambda}",
     "/aws/lambda/${var.event_replay_lambda}",
     "/aws/lambda/${var.ingest_change_event_lambda}",
-    "/aws/lambda/${var.send_email_lambda}",
     "/aws/lambda/${var.service_matcher_lambda}",
     "/aws/lambda/${var.service_sync_lambda}"
   ]
@@ -131,7 +126,6 @@ resource "aws_cloudwatch_query_definition" "search_by_email_correlation_id" {
 
   log_group_names = [
     "/aws/lambda/${var.service_sync_lambda}",
-    "/aws/lambda/${var.send_email_lambda}"
   ]
 
   query_string = <<EOF
@@ -193,7 +187,6 @@ resource "aws_cloudwatch_query_definition" "search_for_report_warnings" {
     "/aws/lambda/${var.dos_db_update_dlq_handler_lambda}",
     "/aws/lambda/${var.event_replay_lambda}",
     "/aws/lambda/${var.ingest_change_event_lambda}",
-    "/aws/lambda/${var.send_email_lambda}",
     "/aws/lambda/${var.service_matcher_lambda}",
     "/aws/lambda/${var.service_sync_lambda}",
     "/aws/lambda/${var.quality_checker_lambda}"

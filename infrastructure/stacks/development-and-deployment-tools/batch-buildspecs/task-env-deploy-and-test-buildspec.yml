@@ -54,16 +54,6 @@ batch:
           LAMBDA: ingest-change-event
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/build-arm-image.yml
 
-    - identifier: build_send_email
-      env:
-        compute-type: BUILD_GENERAL1_SMALL
-        image: aws/codebuild/amazonlinux2-aarch64-standard:3.0
-        type: ARM_CONTAINER
-        privileged-mode: true
-        variables:
-          LAMBDA: send-email
-      buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/build-arm-image.yml
-
     - identifier: build_service_matcher
       env:
         compute-type: BUILD_GENERAL1_SMALL
@@ -129,7 +119,6 @@ batch:
         - build_dos_db_update_dlq_handler
         - build_event_replay
         - build_ingest_change_event
-        - build_send_email
         - build_service_matcher
         - build_service_sync
         - build_slack_messenger
@@ -160,7 +149,7 @@ batch:
           PARALLEL_TEST_COUNT: 20
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
 
     - identifier: integration_test_validation
       env:
@@ -174,7 +163,7 @@ batch:
           PARALLEL_TEST_COUNT: 40
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
 
     - identifier: integration_test_opening_times
       env:
@@ -188,7 +177,7 @@ batch:
           PARALLEL_TEST_COUNT: 40
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
 
     - identifier: integration_test_general
       env:
@@ -202,4 +191,4 @@ batch:
           PARALLEL_TEST_COUNT: 40
       buildspec: infrastructure/stacks/development-and-deployment-tools/batch-buildspecs/task-env-deploy-and-test-batch-jobs/integration-test.yml
       depend-on:
-        - deploy
+        - deploy_cloudwatch_queries
